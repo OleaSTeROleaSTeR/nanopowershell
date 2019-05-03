@@ -1,6 +1,6 @@
 # escape=`
 # Args used by from statements must be defined here:
-ARG fromTag=1709
+ARG fromTag=1809
 ARG InstallerVersion=nanoserver
 ARG InstallerRepo=mcr.microsoft.com/powershell
 ARG NanoServerRepo=mcr.microsoft.com/windows/nanoserver
@@ -10,7 +10,7 @@ ARG NanoServerRepo=mcr.microsoft.com/windows/nanoserver
 FROM ${InstallerRepo}:$InstallerVersion  AS installer-env
 
 # Arguments for installing PowerShell, must be defined in the container they are used
-ARG PS_VERSION=6.1.0-rc.1
+ARG PS_VERSION=6.2.0
 
 ARG PS_PACKAGE_URL=https://github.com/PowerShell/PowerShell/releases/download/v$PS_VERSION/PowerShell-$PS_VERSION-win-x64.zip
 
@@ -40,7 +40,7 @@ RUN Write-host "Verifying valid Version..."; `
 FROM ${NanoServerRepo}:${fromTag}
 
 ARG VCS_REF="none"
-ARG PS_VERSION=6.1.0-rc.1
+ARG PS_VERSION=6.2.0
 ARG IMAGE_NAME=mcr.microsoft.com/powershell
 
 LABEL maintainer="PowerShell Team <powershellteam@hotmail.com>" `
@@ -70,7 +70,9 @@ ENV ProgramFiles="C:\Program Files" `
 COPY --from=installer-env ["\\PowerShell\\", "$ProgramFiles\\PowerShell"]
 
 # Set the path
-RUN setx PATH "%PATH%;%ProgramFiles%\PowerShell"
+USER ContainerAdministrator
+RUN setx /M PATH "%PATH%;%ProgramFiles%\PowerShell"
+USER ContainerUser
 
 # intialize powershell module cache
 RUN pwsh `
